@@ -5,3 +5,5 @@ libpeerconnection.log
 npm-debug.log
 .idea
 docs
+*.js
+*.js.map
