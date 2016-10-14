@@ -6,6 +6,8 @@
   "scripts": {
     "tsc": "tsc",
     "tsc:w": "tsc -w",
+    "typings": "typings",
+    "postinstall": "typings install",
     "test": "karma start",
     "publish-docs": "docco -o docs angular-inview.js && mv docs/angular-inview.html docs/index.html && gh-pages -d docs"
   },
