@@ -4,6 +4,8 @@
   "description": "AngularJS directive to check if a DOM element is in the viewport",
   "main": "angular-inview.js",
   "scripts": {
+    "tsc": "tsc",
+    "tsc:w": "tsc -w",
     "test": "karma start",
     "publish-docs": "docco -o docs angular-inview.js && mv docs/angular-inview.html docs/index.html && gh-pages -d docs"
   },
