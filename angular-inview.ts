@@ -40,6 +40,7 @@ function inViewDirective ($parse) {
         generateParts: boolean;
         throttle: number;
       }
+
       // in-view-options attribute can be specified with an object expression
       // containing:
       //   - `offset`: An array of values to offset the element position.
@@ -101,13 +102,24 @@ function inViewDirective ($parse) {
         }
         viewportRect = offsetRect(viewportRect, options.viewportOffset);
         var elementRect = offsetRect(element[0].getBoundingClientRect(), options.offset);
-        var info = {
-          inView: intersectRect(elementRect, viewportRect),
-          event: event,
-          element: element,
-          elementRect: elementRect,
-          viewportRect: viewportRect
-        };
+
+        interface Info {
+          inView: boolean;
+          event: Event;
+          element: any;
+          elementRect: any;
+          viewportRect: any;
+          parts: any;
+        }
+        
+        var info = {} as Info;
+
+        info.inView = intersectRect(elementRect, viewportRect);
+        info.event = event;
+        info.element = element;
+        info.elementRect =  elementRect;
+        info.viewportRect = viewportRect;
+
         // Add inview parts
         if (options.generateParts && info.inView) {
           info.parts = {};
