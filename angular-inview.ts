@@ -11,7 +11,7 @@
 // Use it in your AngularJS app by including the javascript and requireing it:
 //
 // `angular.module('myApp', ['angular-inview'])`
-var angularInviewModule = angular.module('angular-inview', [])
+let angularInviewModule = angular.module('angular-inview', [])
 
 // ## in-view directive
 //
@@ -56,7 +56,7 @@ function inViewDirective ($parse) {
       //     be included in `$inviewInfo` (default false).
       //   - `throttle`: Specify a number of milliseconds by which to limit the
       //     number of incoming events.
-      var options = {} as Options;
+      let options = {} as Options;
       if (attrs.inViewOptions) {
         options = scope.$eval(attrs.inViewOptions);
       }
@@ -68,7 +68,7 @@ function inViewDirective ($parse) {
       }
 
       // Build reactive chain from an initial event
-      var viewportEventSignal = signalSingle({ type: 'initial' })
+      let viewportEventSignal = signalSingle({ type: 'initial' })
 
       // Merged with the window events
       .merge(signalFromEvent(window, 'checkInView click ready wheel mousewheel DomMouseScroll MozMousePixelScroll resize scroll touchmove mouseup keydown'))
@@ -84,7 +84,7 @@ function inViewDirective ($parse) {
       }
 
       // Map to viewport intersection and in-view informations
-      var inviewInfoSignal = viewportEventSignal
+      let inviewInfoSignal = viewportEventSignal
 
       // Inview information structure contains:
       //   - `inView`: a boolean value indicating if the element is
@@ -93,7 +93,7 @@ function inViewDirective ($parse) {
       //     changed after the last event;
       //   - `event`: the event that initiated the in-view check;
       .map(function(event) {
-        var viewportRect;
+        let viewportRect;
         if (container) {
           viewportRect = container.getViewportRect();
           // TODO merge with actual window!
@@ -101,7 +101,7 @@ function inViewDirective ($parse) {
           viewportRect = getViewportRect();
         }
         viewportRect = offsetRect(viewportRect, options.viewportOffset);
-        var elementRect = offsetRect(element[0].getBoundingClientRect(), options.offset);
+        let elementRect = offsetRect(element[0].getBoundingClientRect(), options.offset);
 
         interface Info {
           inView: boolean;
@@ -112,7 +112,7 @@ function inViewDirective ($parse) {
           parts: any;
         }
         
-        var info = {} as Info;
+        let info = {} as Info;
 
         info.inView = intersectRect(elementRect, viewportRect);
         info.event = event;
@@ -162,8 +162,8 @@ function inViewDirective ($parse) {
       });
 
       // Execute in-view callback
-      var inViewExpression = $parse(attrs.inView);
-      var dispose = inviewInfoSignal.subscribe(function (info) {
+      let inViewExpression = $parse(attrs.inView);
+      let dispose = inviewInfoSignal.subscribe(function (info) {
         scope.$applyAsync(function () {
           inViewExpression(scope, {
             '$inview': info.inView,
@@ -194,7 +194,7 @@ function inViewContainerDirective () {
 // ## Utilities
 
 function getViewportRect () {
-  var result = {
+  let result = {
     top: 0,
     left: 0,
     width: window.innerWidth,
@@ -205,7 +205,7 @@ function getViewportRect () {
   if (result.height) {
     return result;
   }
-  var mode = document.compatMode;
+  let mode = document.compatMode;
   if (mode === 'CSS1Compat') {
     result.width = result.right = document.documentElement.clientWidth;
     result.height = result.bottom = document.documentElement.clientHeight;
@@ -240,7 +240,7 @@ function offsetRect (rect, offset) {
   if (!offset) {
     return rect;
   }
-  var offsetObject = {
+  let offsetObject = {
     top: isPercent(offset[0]) ? (parseFloat(offset[0]) * rect.height) : offset[0],
     right: isPercent(offset[1]) ? (parseFloat(offset[1]) * rect.width) : offset[1],
     bottom: isPercent(offset[2]) ? (parseFloat(offset[2]) * rect.height) : offset[2],
@@ -270,7 +270,7 @@ function isPercent (n) {
 // - `didSubscribeFunc`: a function receiving a `subscriber` as described below
 //
 // Usage:
-//     var mySignal = new QuickSignal(function(subscriber) { ... })
+//     let mySignal = new QuickSignal(function(subscriber) { ... })
 class QuickSignal {
 
   constructor(public didSubscribeFunc) {
