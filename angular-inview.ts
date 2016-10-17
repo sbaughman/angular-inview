@@ -308,7 +308,7 @@ class QuickSignal {
   }
 
   merge(signal) {
-    return signalMerge(this, signal);
+    return this.signalMerge(this, signal);
   }
 
   throttle(threshhold) {
@@ -334,23 +334,23 @@ class QuickSignal {
       };
     });
   }
-}
 
-function signalMerge () {
-  var signals = arguments;
-  return new QuickSignal((subscriber) => {
-    var disposables = [];
-    for (var i = signals.length - 1; i >= 0; i--) {
-      disposables.push(signals[i].subscribe(function () {
-        subscriber.apply(null, arguments);
-      }));
-    }
-    subscriber.$dispose = () => {
-      for (var i = disposables.length - 1; i >= 0; i--) {
-        if (disposables[i]) disposables[i]();
+  signalMerge (...args) {
+    var signals = arguments;
+    return new QuickSignal((subscriber) => {
+      var disposables = [];
+      for (var i = signals.length - 1; i >= 0; i--) {
+        disposables.push(signals[i].subscribe(function () {
+          subscriber.apply(null, arguments);
+        }));
       }
-    }
-  });
+      subscriber.$dispose = () => {
+        for (var i = disposables.length - 1; i >= 0; i--) {
+          if (disposables[i]) disposables[i]();
+        }
+      }
+    });
+  }
 }
 
 // Returns a signal from DOM events of a target.
