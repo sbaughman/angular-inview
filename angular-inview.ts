@@ -32,6 +32,14 @@ function inViewDirective ($parse) {
     restrict: 'A',
     require: '?^^inViewContainer',
     link: function inViewDirectiveLink (scope, element, attrs, container) {
+
+      interface Options {
+        offset: number[];
+        viewportOffset: number[];
+        generateDirection: boolean;
+        generateParts: boolean;
+        throttle: number;
+      }
       // in-view-options attribute can be specified with an object expression
       // containing:
       //   - `offset`: An array of values to offset the element position.
@@ -47,7 +55,7 @@ function inViewDirective ($parse) {
       //     be included in `$inviewInfo` (default false).
       //   - `throttle`: Specify a number of milliseconds by which to limit the
       //     number of incoming events.
-      var options = {};
+      var options = {} as Options;
       if (attrs.inViewOptions) {
         options = scope.$eval(attrs.inViewOptions);
       }
