@@ -267,7 +267,7 @@ class QuickSignal {
   // should be chained.
   subscribe(subscriber) {
     this.didSubscribeFunc(subscriber);
-    var dispose = function () {
+    var dispose = () => {
       if (subscriber.$dispose) {
         subscriber.$dispose();
         subscriber.$dispose = null;
@@ -278,8 +278,8 @@ class QuickSignal {
 
   map(f) {
     var s = this;
-    return new QuickSignal(function (subscriber) {
-      subscriber.$dispose = s.subscribe(function (nextValue) {
+    return new QuickSignal((subscriber) => {
+      subscriber.$dispose = s.subscribe((nextValue) => {
         subscriber(f(nextValue));
       });
     });
@@ -287,8 +287,8 @@ class QuickSignal {
 
   filter(f) {
     var s = this;
-    return new QuickSignal(function (subscriber) {
-      subscriber.$dispose = s.subscribe(function (nextValue) {
+    return new QuickSignal((subscriber) => {
+      subscriber.$dispose = s.subscribe((nextValue) => {
         if (f(nextValue)) {
           subscriber(nextValue);
         }
@@ -298,9 +298,9 @@ class QuickSignal {
 
   scan(initial, scanFunc) {
     var s = this;
-    return new QuickSignal(function (subscriber) {
+    return new QuickSignal((subscriber) => {
       var last = initial;
-      subscriber.$dispose = s.subscribe(function (nextValue) {
+      subscriber.$dispose = s.subscribe((nextValue) => {
         last = scanFunc(last, nextValue);
         subscriber(last);
       });
@@ -313,13 +313,13 @@ class QuickSignal {
 
   throttle(threshhold) {
     var s = this, last, deferTimer;
-    return new QuickSignal(function (subscriber) {
+    return new QuickSignal((subscriber) => {
       var chainDisposable = s.subscribe(function () {
         var now = +new Date,
             args = arguments;
         if (last && now < last + threshhold) {
           clearTimeout(deferTimer);
-          deferTimer = setTimeout(function () {
+          deferTimer = setTimeout(() => {
             last = now;
             subscriber.apply(null, args);
           }, threshhold);
@@ -328,7 +328,7 @@ class QuickSignal {
           subscriber.apply(null, args);
         }
       });
-      subscriber.$dispose = function () {
+      subscriber.$dispose = () => {
         clearTimeout(deferTimer);
         if (chainDisposable) chainDisposable();
       };
@@ -338,14 +338,14 @@ class QuickSignal {
 
 function signalMerge () {
   var signals = arguments;
-  return new QuickSignal(function (subscriber) {
+  return new QuickSignal((subscriber) => {
     var disposables = [];
     for (var i = signals.length - 1; i >= 0; i--) {
       disposables.push(signals[i].subscribe(function () {
         subscriber.apply(null, arguments);
       }));
     }
-    subscriber.$dispose = function () {
+    subscriber.$dispose = () => {
       for (var i = disposables.length - 1; i >= 0; i--) {
         if (disposables[i]) disposables[i]();
       }
@@ -355,21 +355,21 @@ function signalMerge () {
 
 // Returns a signal from DOM events of a target.
 function signalFromEvent (target, event) {
-  return new QuickSignal(function (subscriber) {
-    var handler = function (e) {
+  return new QuickSignal((subscriber) => {
+    var handler = (e) => {
       subscriber(e);
     };
     var el = angular.element(target);
     el.on(event, handler);
-    subscriber.$dispose = function () {
+    subscriber.$dispose = () => {
       el.off(event, handler);
     };
   });
 }
 
 function signalSingle (value) {
-  return new QuickSignal(function (subscriber) {
-    setTimeout(function() { subscriber(value); });
+  return new QuickSignal((subscriber) => {
+    setTimeout(() => { subscriber(value); });
   });
 }
 
