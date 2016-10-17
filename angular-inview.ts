@@ -267,7 +267,7 @@ class QuickSignal {
   // should be chained.
   subscribe(subscriber) {
     this.didSubscribeFunc(subscriber);
-    var dispose = () => {
+    let dispose = () => {
       if (subscriber.$dispose) {
         subscriber.$dispose();
         subscriber.$dispose = null;
@@ -277,18 +277,16 @@ class QuickSignal {
   }
 
   map(f) {
-    var s = this;
     return new QuickSignal((subscriber) => {
-      subscriber.$dispose = s.subscribe((nextValue) => {
+      subscriber.$dispose = this.subscribe((nextValue) => {
         subscriber(f(nextValue));
       });
     });
   }
 
   filter(f) {
-    var s = this;
     return new QuickSignal((subscriber) => {
-      subscriber.$dispose = s.subscribe((nextValue) => {
+      subscriber.$dispose = this.subscribe((nextValue) => {
         if (f(nextValue)) {
           subscriber(nextValue);
         }
@@ -297,10 +295,9 @@ class QuickSignal {
   }
 
   scan(initial, scanFunc) {
-    var s = this;
     return new QuickSignal((subscriber) => {
-      var last = initial;
-      subscriber.$dispose = s.subscribe((nextValue) => {
+      let last = initial;
+      subscriber.$dispose = this.subscribe((nextValue) => {
         last = scanFunc(last, nextValue);
         subscriber(last);
       });
@@ -312,10 +309,10 @@ class QuickSignal {
   }
 
   throttle(threshhold) {
-    var s = this, last, deferTimer;
+    let last, deferTimer;
     return new QuickSignal((subscriber) => {
-      var chainDisposable = s.subscribe(function () {
-        var now = +new Date,
+      let chainDisposable = this.subscribe(function () {
+        let now = +new Date,
             args = arguments;
         if (last && now < last + threshhold) {
           clearTimeout(deferTimer);
@@ -336,16 +333,16 @@ class QuickSignal {
   }
 
   signalMerge (...args) {
-    var signals = arguments;
+    let signals = arguments;
     return new QuickSignal((subscriber) => {
-      var disposables = [];
-      for (var i = signals.length - 1; i >= 0; i--) {
+      let disposables = [];
+      for (let i = signals.length - 1; i >= 0; i--) {
         disposables.push(signals[i].subscribe(function () {
           subscriber.apply(null, arguments);
         }));
       }
       subscriber.$dispose = () => {
-        for (var i = disposables.length - 1; i >= 0; i--) {
+        for (let i = disposables.length - 1; i >= 0; i--) {
           if (disposables[i]) disposables[i]();
         }
       }
@@ -356,10 +353,10 @@ class QuickSignal {
 // Returns a signal from DOM events of a target.
 function signalFromEvent (target, event) {
   return new QuickSignal((subscriber) => {
-    var handler = (e) => {
+    let handler = (e) => {
       subscriber(e);
     };
-    var el = angular.element(target);
+    let el = angular.element(target);
     el.on(event, handler);
     subscriber.$dispose = () => {
       el.off(event, handler);
