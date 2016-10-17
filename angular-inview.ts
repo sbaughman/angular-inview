@@ -92,7 +92,7 @@ function inViewDirective ($parse) {
       //   - `changed`: a boolean value indicating if the inview status
       //     changed after the last event;
       //   - `event`: the event that initiated the in-view check;
-      .map(function(event) {
+      .map(event => {
         let viewportRect;
         if (container) {
           viewportRect = container.getViewportRect();
@@ -132,7 +132,7 @@ function inViewDirective ($parse) {
       })
 
       // Add the changed information to the inview structure.
-      .scan({}, function (lastInfo, newInfo) {
+      .scan({}, (lastInfo, newInfo) => {
         // Add inview direction info
         if (options.generateDirection && newInfo.inView && lastInfo.elementRect) {
           newInfo.direction = {
@@ -149,7 +149,7 @@ function inViewDirective ($parse) {
       })
 
       // Filters only informations that should be forwarded to the callback
-      .filter(function (info) {
+      .filter(info => {
         // Don't forward if no relevant infomation changed
         if (!info.changed) {
           return false;
@@ -163,8 +163,8 @@ function inViewDirective ($parse) {
 
       // Execute in-view callback
       let inViewExpression = $parse(attrs.inView);
-      let dispose = inviewInfoSignal.subscribe(function (info) {
-        scope.$applyAsync(function () {
+      let dispose = inviewInfoSignal.subscribe(info => {
+        scope.$applyAsync(() => {
           inViewExpression(scope, {
             '$inview': info.inView,
             '$inviewInfo': info
@@ -184,7 +184,7 @@ function inViewContainerDirective () {
     controller: ['$element', function ($element) {
       this.element = $element;
       this.eventsSignal = signalFromEvent($element, 'scroll');
-      this.getViewportRect = function () {
+      this.getViewportRect = () => {
         return $element[0].getBoundingClientRect();
       };
     }]
