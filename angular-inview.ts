@@ -3,8 +3,6 @@
 // - Repository: https://github.com/thenikso/angular-inview
 // - Install with: `npm install angular-inview@beta`
 // - Version: **2.1.0**
-(function() {
-'use strict';
 
 // An [angular.js](https://angularjs.org) directive to evaluate an expression if
 // a DOM element is or not in the current visible browser viewport.
@@ -389,12 +387,3 @@ function signalSingle (value) {
     setTimeout(() => { subscriber(value); });
   });
 }
-
-// Module loaders exports
-if (typeof define === 'function' && define.amd) {
-  define(['angular'], angularInviewModule);
-} else if (typeof module !== 'undefined' && module && module.exports) {
-  module.exports = angularInviewModule;
-}
-
-})();
