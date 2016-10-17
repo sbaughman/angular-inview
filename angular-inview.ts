@@ -251,88 +251,90 @@ function isPercent (n) {
 //
 // Usage:
 //     var mySignal = new QuickSignal(function(subscriber) { ... })
-function QuickSignal (didSubscribeFunc) {
-  this.didSubscribeFunc = didSubscribeFunc;
-}
+class QuickSignal {
 
-// Subscribe to a signal and consume the steam of data.
-//
-// Returns a function that can be called to stop the signal stream of data and
-// perform cleanup.
-//
-// A `subscriber` is a function that will be called when a new value arrives.
-// a `subscriber.$dispose` property can be set to a function to be called uppon
-// disposal. When setting the `$dispose` function, the previously set function
-// should be chained.
-QuickSignal.prototype.subscribe = function (subscriber) {
-  this.didSubscribeFunc(subscriber);
-  var dispose = function () {
-    if (subscriber.$dispose) {
-      subscriber.$dispose();
-      subscriber.$dispose = null;
-    }
+  constructor(public didSubscribeFunc) {
   }
-  return dispose;
-}
-
-QuickSignal.prototype.map = function (f) {
-  var s = this;
-  return new QuickSignal(function (subscriber) {
-    subscriber.$dispose = s.subscribe(function (nextValue) {
-      subscriber(f(nextValue));
-    });
-  });
-};
-
-QuickSignal.prototype.filter = function (f) {
-  var s = this;
-  return new QuickSignal(function (subscriber) {
-    subscriber.$dispose = s.subscribe(function (nextValue) {
-      if (f(nextValue)) {
-        subscriber(nextValue);
+  
+  // Subscribe to a signal and consume the steam of data.
+  //
+  // Returns a function that can be called to stop the signal stream of data and
+  // perform cleanup.
+  //
+  // A `subscriber` is a function that will be called when a new value arrives.
+  // a `subscriber.$dispose` property can be set to a function to be called uppon
+  // disposal. When setting the `$dispose` function, the previously set function
+  // should be chained.
+  subscribe(subscriber) {
+    this.didSubscribeFunc(subscriber);
+    var dispose = function () {
+      if (subscriber.$dispose) {
+        subscriber.$dispose();
+        subscriber.$dispose = null;
       }
+    }
+    return dispose;
+  }
+
+  map(f) {
+    var s = this;
+    return new QuickSignal(function (subscriber) {
+      subscriber.$dispose = s.subscribe(function (nextValue) {
+        subscriber(f(nextValue));
+      });
     });
-  });
-};
+  }
 
-QuickSignal.prototype.scan = function (initial, scanFunc) {
-  var s = this;
-  return new QuickSignal(function (subscriber) {
-    var last = initial;
-    subscriber.$dispose = s.subscribe(function (nextValue) {
-      last = scanFunc(last, nextValue);
-      subscriber(last);
+  filter(f) {
+    var s = this;
+    return new QuickSignal(function (subscriber) {
+      subscriber.$dispose = s.subscribe(function (nextValue) {
+        if (f(nextValue)) {
+          subscriber(nextValue);
+        }
+      });
     });
-  });
-}
+  }
 
-QuickSignal.prototype.merge = function (signal) {
-  return signalMerge(this, signal);
-};
+  scan(initial, scanFunc) {
+    var s = this;
+    return new QuickSignal(function (subscriber) {
+      var last = initial;
+      subscriber.$dispose = s.subscribe(function (nextValue) {
+        last = scanFunc(last, nextValue);
+        subscriber(last);
+      });
+    });
+  }
 
-QuickSignal.prototype.throttle = function (threshhold) {
-  var s = this, last, deferTimer;
-  return new QuickSignal(function (subscriber) {
-    var chainDisposable = s.subscribe(function () {
-      var now = +new Date,
-          args = arguments;
-      if (last && now < last + threshhold) {
-        clearTimeout(deferTimer);
-        deferTimer = setTimeout(function () {
+  merge(signal) {
+    return signalMerge(this, signal);
+  }
+
+  throttle(threshhold) {
+    var s = this, last, deferTimer;
+    return new QuickSignal(function (subscriber) {
+      var chainDisposable = s.subscribe(function () {
+        var now = +new Date,
+            args = arguments;
+        if (last && now < last + threshhold) {
+          clearTimeout(deferTimer);
+          deferTimer = setTimeout(function () {
+            last = now;
+            subscriber.apply(null, args);
+          }, threshhold);
+        } else {
           last = now;
           subscriber.apply(null, args);
-        }, threshhold);
-      } else {
-        last = now;
-        subscriber.apply(null, args);
-      }
+        }
+      });
+      subscriber.$dispose = function () {
+        clearTimeout(deferTimer);
+        if (chainDisposable) chainDisposable();
+      };
     });
-    subscriber.$dispose = function () {
-      clearTimeout(deferTimer);
-      if (chainDisposable) chainDisposable();
-    };
-  });
-};
+  }
+}
 
 function signalMerge () {
   var signals = arguments;
